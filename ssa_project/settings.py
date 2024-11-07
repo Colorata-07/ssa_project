@@ -19,7 +19,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'chipin.log'),  # Log file location
+            #'filename': os.path.join(BASE_DIR, 'chipin.log'),  Log file location
         },
     },
     'loggers': {
