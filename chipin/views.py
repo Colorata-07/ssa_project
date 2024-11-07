@@ -10,8 +10,23 @@ from .forms import GroupCreationForm
 from .models import Group
 import urllib.parse
 
+@login_required
 def home(request):
-    return render(request, "chipin/home.html")
+    pending_invitations = Group.objects.filter(invited_users__email=request.user.email)
+    return render(request, "chipin/home.html", {'pending_invitations': pending_invitations})
+
+@login_required
+def create_group(request):
+    if request.method == 'POST':
+        form = GroupCreationForm(request.POST, user=request.user)
+        if form.is_valid():
+            group = form.save()
+            logger.info(f"User '{request.user.username}' created group '{group.name}'.")  # Log group creation
+            messages.success(request, f'Group "{group.name}" created successfully!')
+            return redirect('group_detail', group_id=group.id)
+    else:
+        form = GroupCreationForm(user=request.user)
+    return render(request, 'chipin/create_group.html', {'form': form})
 
 @login_required
 def create_group(request):

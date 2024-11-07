@@ -11,6 +11,25 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'chipin.log'),  # Log file location
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,21 +44,20 @@ SECRET_KEY = 'django-insecure-l&=%hcjfv$g4h)!@nrlkuylyib7%m@w4se=uk1ziyn0gxqy@+s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
+INSTALLED_APPS = [
+    'chipin',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+]
 
 # Application definition
 
-INSTALLED_APPS = [
-    'django.contrib.auth',
-    'django.contrib.sessions',
-    'otp',
-    'otp_totp',
-    'two_factor',
-    'django_otp.plugins.otp_totp',
-    'django_otp.plugins.otp_static',
-    # other apps...
-]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -124,4 +142,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 RECAPTCHA_SECRET_KEY = "6LeMRm4qAAAAAPslEmmSL7zQBpwLV-YHw0R99ytB"
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+
+PASSWORD_HASHERS = [
+     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+     'django.contrib.auth.hashers.Argon2PasswordHasher',
+     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+ ]
