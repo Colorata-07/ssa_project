@@ -1,21 +1,15 @@
 from django.shortcuts import render, redirect
 from .forms import UserRegistrationForm
-from django.contrib import messages 
 import requests
 from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
-from django.contrib import messages
 from django.contrib.auth.models import User
-from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 import logging
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.shortcuts import render, redirect
 from django.urls import reverse
-
 # Set up logger
 logger = logging.getLogger(__name__)
 

@@ -17,15 +17,15 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
-            'level': 'INFO',
+            'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'chipin.log'),  #Log file location
+            'filename': 'chipin_error.log',
         },
     },
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': 'INFO',
+            'level': 'ERROR',
             'propagate': True,
         },
     },
@@ -66,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_otp.middleware.OTPMiddleware',  # Middleware to handle OTP
     # other middleware...
+    'django.middleware.csrf.CsrfViewMiddleware',  # Ensure CSRF middleware is included
 ]
 
 ROOT_URLCONF = 'ssa_project.urls'
@@ -150,3 +151,9 @@ PASSWORD_HASHERS = [
      'django.contrib.auth.hashers.Argon2PasswordHasher',
      'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
  ]
+
+SESSION_COOKIE_SECURE = True  # Ensures session cookies are only sent over HTTPS
+SESSION_COOKIE_HTTPONLY = True  # Prevents JavaScript access to session cookies
+SESSION_COOKIE_SAMESITE = 'Lax'  # Protects against Cross-Site Request Forgery (CSRF) attacks
+SESSION_COOKIE_AGE = 1800  # 30-minute session expiration
+

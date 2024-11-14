@@ -7,3 +7,8 @@
     <p>This page is for user management functions.</p>
     <a href="{% url 'chipin:home' %}">Click through to ChipIn Functions</a>
 {% endblock %}
+<form method="POST" action="/create_group/">
+    {% csrf_token %}  <!-- Include CSRF token for protection -->
+    <input type="text" name="group_name">
+    <button type="submit">Create Group</button>
+</form>

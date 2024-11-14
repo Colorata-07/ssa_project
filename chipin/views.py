@@ -10,6 +10,29 @@ from .forms import GroupCreationForm
 from .models import Group
 import urllib.parse
 from .models import GroupJoinRequest
+import logging
+from django.shortcuts import render
+from .models import Group, Comment
+from .forms import CommentForm
+
+# Set up logger
+logger = logging.getLogger(__name__)
+def user_groups_view(request):
+    try:
+        # Simulate a potential error (e.g., a database issue)
+        if not request.user.is_authenticated:
+            raise PermissionError("User not authenticated.")
+        
+        groups = Group.objects.filter(members=request.user)
+        return render(request, 'chipin/user_groups.html', {'groups': groups})
+    
+    except PermissionError as e:
+        logger.error(f"Error: {e}")  # Log the error internally
+        return render(request, 'chipin/error.html', {'message': 'You must be logged in to view your groups.'})
+    
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")  # Catch all other errors
+        return render(request, 'chipin/error.html', {'message': 'An unexpected error occurred. Please try again later.'})
 
 @login_required
 def request_to_join_group(request, group_id):
@@ -151,3 +174,33 @@ def vote_on_join_request(request, group_id, request_id, vote):
         join_request.save()
         messages.success(request, f"{join_request.user.profile.nickname} has been approved to join the group!") 
     return redirect('chipin:group_detail', group_id=group.id)
+
+import bleach
+def post_comment(request):
+    if request.method == 'POST':
+        comment = request.POST.get('comment')
+        # Sanitise user input to remove any harmful scripts
+        sanitized_comment = bleach.clean(comment)
+        # Save the sanitised comment to the database
+        Comment.objects.create(user=request.user, text=sanitized_comment)
+
+@login_required
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if comment.user != request.user:  # Ensure only the comment author can edit
+        return redirect('chipin:group_detail', group_id=comment.group.id)
+    if request.method == 'POST':
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            return redirect('chipin:group_detail', group_id=comment.group.id)
+    else:
+        form = CommentForm(instance=comment)
+    return render(request, 'chipin/edit_comment.html', {'form': form, 'comment': comment})
+
+@login_required
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if comment.user == request.user or request.user == comment.group.admin:  # Allow author or group admin to delete
+        comment.delete()
+    return redirect('chipin:group_detail', group_id=comment.group.id)

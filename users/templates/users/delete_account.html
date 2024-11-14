@@ -4,3 +4,8 @@
     {% csrf_token %}
     <button type="submit">Delete My Account</button>
 </form>
+<form method="POST" action="/create_group/">
+    {% csrf_token %}  <!-- Include CSRF token for protection -->
+    <input type="text" name="group_name">
+    <button type="submit">Create Group</button>
+</form>
