@@ -6,15 +6,32 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from django.conf import settings
 from django.contrib.auth.models import User
-from .forms import GroupCreationForm
+from .forms import GroupCreationForm, FileUploadForm
 from .models import Group
 import urllib.parse
 from .models import GroupJoinRequest
 import logging
 from django.shortcuts import render
 from .models import Group, Comment
-from .forms import CommentForm
+from .forms import CommentForm, UserProfilePictureForm
+from django.core.files.storage import FileSystemStorage
 
+
+def upload_profile_picture(request):
+    if request.method == 'POST':
+        form = UserProfilePictureForm(request.POST, request.FILES)
+        if form.is_valid():
+            picture = form.cleaned_data['picture']
+            
+            # Securely store the file in a directory not accessible via the web
+            fs = FileSystemStorage(location='secure_uploads/')
+            filename = fs.save(picture.name, picture)
+            
+            return render(request, 'upload_success.html', {'filename': filename})
+    else:
+        form = UserProfilePictureForm()
+    
+    return render(request, 'upload_picture.html', {'form': form})
 # Set up logger
 logger = logging.getLogger(__name__)
 def user_groups_view(request):
@@ -87,6 +104,7 @@ def home(request):
         'user_join_requests': user_join_requests, 
         'available_groups': available_groups  
     })
+
 @login_required
 def create_group(request):
     if request.method == 'POST':
@@ -175,7 +193,6 @@ def vote_on_join_request(request, group_id, request_id, vote):
         messages.success(request, f"{join_request.user.profile.nickname} has been approved to join the group!") 
     return redirect('chipin:group_detail', group_id=group.id)
 
-import bleach
 def post_comment(request):
     if request.method == 'POST':
         comment = request.POST.get('comment')
@@ -204,3 +221,18 @@ def delete_comment(request, comment_id):
     if comment.user == request.user or request.user == comment.group.admin:  # Allow author or group admin to delete
         comment.delete()
     return redirect('chipin:group_detail', group_id=comment.group.id)
+
+def upload_file(request):
+    if request.method == 'POST':
+        form = FileUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = form.cleaned_data['file']
+            # Store file in a secure directory
+            fs = FileSystemStorage(location='secure_uploads/')
+            filename = fs.save(file.name, file)
+            return render(request, 'upload_success.html', {'filename': filename})
+    else:
+        form = FileUploadForm()
+    
+
+

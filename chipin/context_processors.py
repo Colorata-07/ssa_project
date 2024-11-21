@@ -1,4 +1,5 @@
 from users.models import Profile
+
 def user_profile(request):
     if request.user.is_authenticated:
         try:

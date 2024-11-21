@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
+
 class LoginTestCase(TestCase):
     def setUp(self):
         # Create a test user to login with

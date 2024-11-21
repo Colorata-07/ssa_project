@@ -2,8 +2,22 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Profile
-from .models import Comment
 
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Enter your comment...'})
+        }
+
+    # Clean the content to sanitise input
+    def clean_content(self):
+        content = self.cleaned_data.get('content')
+        if "<script>" in content.lower():  # Prevent XSS by checking for script tags
+            raise forms.ValidationError("Invalid content.")
+        return content
+    
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30, required=True)
@@ -27,18 +41,3 @@ class UserRegistrationForm(UserCreationForm):
             profile.nickname = self.cleaned_data['nickname']
             profile.save()
         return user
-    
-class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ['content']
-        widgets = {
-            'content': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Enter your comment...'})
-        }
-
-    # Clean the content to sanitise input
-    def clean_content(self):
-        content = self.cleaned_data.get('content')
-        if "<script>" in content.lower():  # Prevent XSS by checking for script tags
-            raise forms.ValidationError("Invalid content.")
-        return content
